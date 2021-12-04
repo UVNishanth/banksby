@@ -45,7 +45,7 @@ module.exports = class NftBlock extends Block {
     }
     if(tx.data.type == undefined) return true;
     //console.log("type of buyer:"+typeof(tx.data.buyer));
-    console.log("tx is : "+tx.data.nftID);
+    //console.log("tx is : "+tx.data.nftID);
     switch (tx.data.type) {
 
       case constants.CREATE_NFT: 
@@ -91,9 +91,9 @@ module.exports = class NftBlock extends Block {
     this.nfts.set(nftID, nft);
     this.titleToId.set(String(nft.artistName+nft.title), nftID);
     console.log("Mappig here: ");
-    this.titleToId.forEach((key, value) => {
-      console.log(key+": "+value);
-    });
+    for(let [key,value] of this.titleToId.entries()){
+      console.log(key,value);
+    }
     
     // Adding NFT to artists list.
     let artistNfts = this.artistDb.get(artist) || []; // using array coz insertion efficiency reqd

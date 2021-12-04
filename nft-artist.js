@@ -49,11 +49,11 @@ module.exports = class NftArtist extends Client {
       nftList.forEach(nftID => {
         let nft = this.lastBlock.getNft(nftID);
         console.log(`
-        ${nft.artistName}'s "${nft.title}"
-        ------------------------------------
+        artist: ${nft.artistName} 
+        piece: "${nft.title}"
+        ---x----x-----x-----x------
         ${nft.content}
         `);
-        console.log();
       });
     }
   }

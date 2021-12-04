@@ -34,23 +34,28 @@ module.exports = class NftBuyer extends Client {
     }
 
     getNftIdsbyTitle(artist, title){
-        console.log("Map is: "+this.lastBlock.titleToId.get(String(artist.name+title)));
+        console.log("Map is: ");
+        for (let [key, value] of this.lastBlock.titleToId){
+            console.log(key,value);
+        }
+        //console.log("Map is: "+this.lastBlock.titleToId.get(String(artist.name+title)));
+        console.log("Key is: "+String(artist.name+title));
         return this.lastBlock.titleToId.get(String(artist.name+title));
     }
   
     /**
      * Post a transaction transferring an NFT to a new owner.
      */
-    showNfts() {
-      let nftList = this.lastBlock.getOwnersNftList(this.address);
-      nftList.forEach(nftID => {
-        let nft = this.lastBlock.getNft(nftID);
-        console.log(`
-        ${nft.artistName}'s "${nft.title}"
-        ------------------------------------
-        ${nft.content}
-        `);
-        console.log();
-      });
-    }
+     showNfts() {
+        let nftList = this.lastBlock.getOwnersNftList(this.address);
+        nftList.forEach(nftID => {
+          let nft = this.lastBlock.getNft(nftID);
+          console.log(`
+          artist: ${nft.artistName} 
+          piece: "${nft.title}"
+          ---x----x-----x-----x------
+          ${nft.content}
+          `);
+        });
+      }
   }
