@@ -11,27 +11,10 @@ module.exports = class NftArtist extends Client {
      */
     createNft(nft) {
       this.postGenericTransaction({
-        fee: 0,
         data: {
           type: constants.CREATE_NFT,
           nft: nft,
-        },
-      });
-    }
-  
-    sellNft() {
-      this.log("Not implemented: sellNft");
-    }
-  
-    transferNft(receiver, nftID) {
-      // Posting a transaction to transfer the NFT.
-      this.postGenericTransaction({
-        fee: 0,
-        data: {
-          type: constants.NFT_TRANSFER,
-          receiver: receiver,
-          nftID: nftID
-        },
+        }
       });
     }
   

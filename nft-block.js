@@ -1,6 +1,7 @@
 "use strict";
 
 const { type } = require('os');
+const { exit } = require('process');
 const { Block, utils } = require('spartan-gold');
 
 const constants = require('./nft-flags');
@@ -52,8 +53,35 @@ module.exports = class NftBlock extends Block {
         this.createNft(tx.from, tx.id, tx.data.nft);
         break;
 
-      case constants.BUY_NFT:
-        this.buyNft(tx.from, tx.data.nftID);
+      case constants.UPDATE_MAPS:
+        // this.transferNft(tx.from, tx.data.owner, tx.data.nftID);
+        // break;
+        //console.log("HEERERERE");
+        //console.log(tx.data.nftOwnerMap);
+        let nftOwnerMap = new Map(Object.entries(JSON.parse(tx.data.nftOwnerMap)));
+        //console.log("HEERERERE");
+        // for( let[key, value] of nftOwnerMap.entries()){
+        //   console.log(key,value);
+        // }
+        nftOwnerMap.forEach((value, key) => {
+          nftOwnerMap.set(key, new Set(JSON.parse(value)));
+        });
+
+        let nftDb = new Map(Object.entries(JSON.parse(tx.data.nftDb)));
+        console.log("HEERERERE");
+        for( let[key, value] of nftOwnerMap.entries()){
+          console.log(key,value);
+        }
+        nftDb.forEach((value, key) => {
+          nftDb.set(key, JSON.parse(value));
+        });
+        console.log("HEHEHEHE nftDb");
+        for( let[key, value] of nftDb.entries()){
+          console.log(key,value);
+        }
+        // let nftDb = new Map(Object.entries(tx.data.nftDb)); 
+        // let nftOwnerMap = new Map(Object.entries(tx.data.nftOwnerMap)); 
+        this.transferNft(nftDb, nftOwnerMap);
         break;
 
       default:
@@ -114,38 +142,47 @@ module.exports = class NftBlock extends Block {
 
   buyNft(buyer, nftID){
   // Adding NFT to receiver's list.
-    console.log("NFTS list: ");
-    this.nfts.forEach((key, value) => {
-      console.log(key+": "+value);
-    });
-    let reqdNft = this.getNft(nftID);
-    let price = reqdNft.price;
-    let owner = this.nftDb.get(nftID);
-    let artist = this.nftToArtistMap.get(nftID);
-    console.log("Type of owner: "+typeof(owner)+" type of artist: "+typeof(artist));
-    console.log("Values of owner: "+owner+" value of artist: "+artist);
-    if(owner == artist){
-      console.log("Type of buyer is: "+typeof(buyer));
+    // console.log("NFTS list: ");
+    // this.nfts.forEach((key, value) => {
+    //   console.log(key+": "+value);
+    // });
+    // let reqdNft = this.getNft(nftID);
+    // let price = reqdNft.price;
+    // let owner = this.nftDb.get(nftID);
+    // let artist = this.nftToArtistMap.get(nftID);
+    // console.log("Type of owner: "+typeof(owner)+" type of artist: "+typeof(artist));
+    // console.log("Values of owner: "+owner+" value of artist: "+artist);
+    // if(owner == artist){
+      //console.log("Type of buyer is: "+typeof(buyer));
       //buyer.postTransaction([{ amount: price, address: artist.address }]);
-      this.transferNft(buyer, artist, nftID)
-    }
+    //this.transferNft(buyer, artist, nftID)
+    //}
     // else{
     //   let share = 
     // }
   } 
 
-  transferNft(buyer, seller, nftID) {
-    let buyerOwnedNfts = this.nftOwnerMap.get(buyer) || new Set(); // using set coz searching and deletion efficiency
-    if(!buyerOwnedNfts.has(nftID)) {
-        buyerOwnedNfts.add(nftID);
-        this.nftOwnerMap.set(buyer, buyerOwnedNfts);
-    }
-    this.nftDb.set(nftID, buyer);
+  // transferNft(buyer, seller, nftID) {
+  //   let buyerOwnedNfts = this.nftOwnerMap.get(buyer) || new Set(); // using set coz searching and deletion efficiency
+  //   if(!buyerOwnedNfts.has(nftID)) {
+  //       buyerOwnedNfts.add(nftID);
+  //       this.nftOwnerMap.set(buyer, buyerOwnedNfts);
+  //   }
+  //   this.nftDb.set(nftID, buyer);
 
-    // Removing nft from sender
-    let sellerOwnedNfts = this.nftOwnerMap.get(seller) || new Set();
-    sellerOwnedNfts.delete(nftID);
-    this.nftOwnerMap.set(seller, sellerOwnedNfts);
+  //   // Removing nft from sender
+  //   let sellerOwnedNfts = this.nftOwnerMap.get(seller) || new Set();
+  //   sellerOwnedNfts.delete(nftID);
+  //   this.nftOwnerMap.set(seller, sellerOwnedNfts);
+  //   return;
+  // }
+  transferNft(nftDb, nftOwnerMap) {
+    // console.log("New owner map: ");
+    //     for(let [key, value] of nftOwnerMap){
+    //         console.log(key,value);
+    //     }
+    this.nftDb = new Map(nftDb);
+    this.nftOwnerMap = new Map(nftOwnerMap);
     return;
   }
 

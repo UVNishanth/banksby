@@ -1,6 +1,7 @@
 const {Blockchain,Miner,Transaction,FakeNet} = require('spartan-gold');
 const NftArtist = require('./nft-artist.js');
-const NftBuyer = require('./nft-buyer')
+const NftBuyer = require('./nft-buyer');
+const NftBroker = require('./nft-broker.js');
 const NftBlock = require('./nft-block.js');
 const { clear } = require('console');
 
@@ -8,6 +9,8 @@ let fakeNet = new FakeNet();
 
 // Clients and miners
 let manglobe = new NftBuyer({name: "Studio Manglobe", net: fakeNet});
+let madhouse = new NftBuyer({name: "Studio Madhouse", net: fakeNet});
+let shinichiro = new NftBroker({name: "Shinichiro", net: fakeNet});
 let minnie = new Miner({name: "Minnie", net: fakeNet});
 let mickey = new Miner({name: "Mickey", net: fakeNet});
 
@@ -19,12 +22,13 @@ let genesis = Blockchain.makeGenesis({
   blockClass: NftBlock,
   transactionClass: Transaction,
   clientBalanceMap: new Map([
-    [manglobe,233], [nujabes,500], [minnie,500], [mickey,500], 
+    [manglobe,233], [madhouse, 500], [nujabes,500], [minnie,500], [mickey,500], [shinichiro, 200] 
   ]),
 });
 
 function showBalances(client) {
   console.log(`Studio Manglobe:  ${client.lastBlock.balanceOf(manglobe.address)}`);
+  console.log(`Studio Madhouse:  ${client.lastBlock.balanceOf(madhouse.address)}`);
   console.log(`Minnie: ${client.lastBlock.balanceOf(minnie.address)}`);
   console.log(`Mickey: ${client.lastBlock.balanceOf(mickey.address)}`);
   console.log(`Nujabes: ${client.lastBlock.balanceOf(nujabes.address)}`);
@@ -44,7 +48,7 @@ setTimeout(() => {
   nujabes.createNft({
     artistName: nujabes.name,  title: "Battlecry",
     price: 20,
-    royalty: 0.2,
+    royalty: 0.02,
     content: `
     The elements compose a magum
     opus my modus operandi amalgam`
@@ -52,15 +56,16 @@ setTimeout(() => {
 }, 2000);
 
 nujabes.showNfts();
+manglobe.approveBroker(shinichiro);
 
 setTimeout(() => {
   let nftID = manglobe.getNftIdsbyTitle(nujabes, "Battlecry");
   console.log(`***Transferring NFT ${nftID}***`);
   //nujabes.transferNft(manglobe.address, nftID);
-  manglobe.buyNft(nftID, nujabes);
+  //manglobe.buyNft(nftID, nujabes);
+  shinichiro.buyNft(manglobe, nftID, nujabes);
 }, 5000);
 
-// Print out the final balances after it has been running for some time.
 setTimeout(() => {
   console.log();
   console.log(`Minnie has a chain of length ${minnie.currentBlock.chainLength}:`);
@@ -69,11 +74,44 @@ setTimeout(() => {
 
   console.log();
   console.log("Showing NFTs for nujabes:");
-  nujabes.showNfts(nujabes.address);
+  nujabes.showNfts();
 
   console.log();
   console.log("Showing NFTs for Studio Manglobe:");
-  manglobe.showNfts(manglobe.address);
+  manglobe.showNfts();
+
+  console.log();
+  console.log("Showing NFTs for Studio Madhouse:");
+  madhouse.showNfts();
 
   process.exit(0);
 }, 10000);
+
+// setTimeout(() => {
+//   let nftID = madhouse.getNftIdsbyTitle(nujabes, "Battlecry");
+//   console.log(`***Transferring NFT ${nftID}***`);
+//   //nujabes.transferNft(manglobe.address, nftID);
+//   madhouse.buyNft(nftID, manglobe, nujabes);
+// }, 5000);
+
+// // Print out the final balances after it has been running for some time.
+// setTimeout(() => {
+//   console.log();
+//   console.log(`Minnie has a chain of length ${minnie.currentBlock.chainLength}:`);
+//   console.log("Final balances (manglobe's perspective):");
+//   showBalances(manglobe);
+
+//   console.log();
+//   console.log("Showing NFTs for nujabes:");
+//   nujabes.showNfts();
+
+//   console.log();
+//   console.log("Showing NFTs for Studio Manglobe:");
+//   manglobe.showNfts();
+
+//   console.log();
+//   console.log("Showing NFTs for Studio Madhouse:");
+//   madhouse.showNfts();
+
+//   process.exit(0);
+// }, 10000);

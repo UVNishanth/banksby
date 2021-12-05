@@ -1,5 +1,6 @@
 "use strict";
 
+const { exit } = require('process');
 const { Client } = require('spartan-gold');
 
 const constants = require('./nft-flags');
@@ -14,17 +15,70 @@ module.exports = class NftBuyer extends Client {
       this.log("Not implemented: sellNft");
     }
   
-    buyNft(nftID, artist) {
+    buyNft(nftID, owner, artist = owner) {
       // Posting a transaction to transfer the NFT.
+        console.log("HElllooo");
+        let reqdNft = this.lastBlock.nfts.get(nftID);
+        let price = reqdNft.price;
+        let ogOwner = this.lastBlock.nftDb.get(nftID);
+        let ogArtist = this.lastBlock.nftToArtistMap.get(nftID);
+        console.log("Artist: "+reqdNft.artistName+" price: "+price);
+        console.log("Values of owner: "+ogOwner+" value of artist: "+ogArtist);
+        if(ogOwner != ogArtist){
+            console.log("Happening------");
+            let royalty = price * reqdNft.royalty;
+            super.postTransaction([{ amount: royalty, address: artist.address }]);
+            price -= royalty;
+        }
+        console.log("Transaction done");
+        super.postTransaction([{ amount: price, address: owner.address }]);
+        let buyer = this.address;
+        let seller = owner.address;
+        let buyerOwnedNfts = this.lastBlock.nftOwnerMap.get(buyer) || new Set(); // using set coz searching and deletion efficiency
+        let newNftOwnerMap = this.lastBlock.nftOwnerMap;
+        let newNftDb = this.lastBlock.nftDb;
+        if(!buyerOwnedNfts.has(nftID)) {
+            buyerOwnedNfts.add(nftID);
+            newNftOwnerMap.set(buyer, buyerOwnedNfts);
+        }
+        newNftDb.set(nftID, buyer);
 
-      this.postGenericTransaction({
-        fee: 0,
-        data: {
-          type: constants.BUY_NFT,
-          nftID: nftID
-        },
-      });
-      super.postTransaction([{ amount: 20, address: artist.address }]);
+        // Removing nft from sender
+        let sellerOwnedNfts = newNftOwnerMap.get(seller) || new Set();
+        //let newSellerOwnedNfts = this.lastBlock.nftOwnerMap;
+        sellerOwnedNfts.delete(nftID);
+        newNftOwnerMap.set(seller, sellerOwnedNfts);
+        // this.postGenericTransaction({
+        //     data: {
+        //         type: constants.TRANSFER_NFT,
+        //         nftID: nftID,
+        //         owner: ogOwner
+        //     }
+        // });
+        for(let [key, value] of newNftDb.entries()){
+            console.log(key,value);
+        }
+        console.log("Now wrapping");
+        let json2 = {};
+        newNftOwnerMap.forEach((value, key) => {
+            json2[key] = JSON.stringify(Array.from(value));
+        });
+        let json1 = {};
+        newNftDb.forEach((value, key) => {
+            json1[key] = JSON.stringify(value);
+        });
+        let obj1 = JSON.stringify(json1);
+        let obj2 = JSON.stringify(json2);
+        console.log("JSON1 is: "+obj1);
+        console.log("JSON2 is: "+obj2);
+        this.postGenericTransaction({
+            data: {
+                type: constants.UPDATE_MAPS,
+                nftDb: obj1,
+                nftOwnerMap: obj2
+                //sellerNft: newSellerOwnedNfts
+            }
+        });
     }
   
     getNftIds() {
@@ -41,6 +95,10 @@ module.exports = class NftBuyer extends Client {
         //console.log("Map is: "+this.lastBlock.titleToId.get(String(artist.name+title)));
         console.log("Key is: "+String(artist.name+title));
         return this.lastBlock.titleToId.get(String(artist.name+title));
+    }
+
+    approveBroker(broker){
+        broker.setClient(this);
     }
   
     /**
