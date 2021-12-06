@@ -1,0 +1,25 @@
+{
+  "name": "imagebasednft",
+  "version": "1.0.0",
+  "description": "marketplace for image-based nft",
+  "main": "driver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UVNishanth/imageBasedNFT.git"
+  },
+  "author": "Nishanth Uchil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UVNishanth/imageBasedNFT/issues"
+  },
+  "homepage": "https://github.com/UVNishanth/imageBasedNFT#readme",
+  "dependencies": {
+    "jimp": "^0.16.1"
+  },
+  "devDependencies": {
+    "compress-images": "^2.0.4"
+  }
+}

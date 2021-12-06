@@ -1,5 +1,6 @@
 "use strict";
 
+const { exit } = require('process');
 const { Client } = require('spartan-gold');
 
 const constants = require('./nft-flags');
@@ -16,6 +17,12 @@ module.exports = class NftArtist extends Client {
           nft: nft,
         }
       });
+    }
+
+    getNftImage(nftId){
+      let buf = this.lastBlock.nfts.get(nftId);
+      console.log("JSON is: "+buf.content);
+      return Buffer.from(JSON.parse(buf.content).data);
     }
   
     getNftIds() {
