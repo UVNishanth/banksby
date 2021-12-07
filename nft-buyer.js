@@ -48,16 +48,6 @@ module.exports = class NftBuyer extends Client {
         //let newSellerOwnedNfts = this.lastBlock.nftOwnerMap;
         sellerOwnedNfts.delete(nftID);
         newNftOwnerMap.set(seller, sellerOwnedNfts);
-        // this.postGenericTransaction({
-        //     data: {
-        //         type: constants.TRANSFER_NFT,
-        //         nftID: nftID,
-        //         owner: ogOwner
-        //     }
-        // });
-        for(let [key, value] of newNftDb.entries()){
-            console.log(key,value);
-        }
         console.log("Now wrapping");
         let json2 = {};
         newNftOwnerMap.forEach((value, key) => {
@@ -69,11 +59,9 @@ module.exports = class NftBuyer extends Client {
         });
         let obj1 = JSON.stringify(json1);
         let obj2 = JSON.stringify(json2);
-        console.log("JSON1 is: "+obj1);
-        console.log("JSON2 is: "+obj2);
         this.postGenericTransaction({
             data: {
-                type: constants.UPDATE_MAPS,
+                flag: constants.UPDATE_MAPS,
                 nftDb: obj1,
                 nftOwnerMap: obj2
                 //sellerNft: newSellerOwnedNfts
@@ -82,8 +70,6 @@ module.exports = class NftBuyer extends Client {
     }
   
     getNftIds() {
-    //   console.log("Last Block owner list: ");
-    //   console.log(this.lastConfirmedBlock.nftOwnerMap);
       return this.lastBlock.nftOwnerMap.get(this.address);
     }
 
@@ -92,7 +78,6 @@ module.exports = class NftBuyer extends Client {
         for (let [key, value] of this.lastBlock.titleToId){
             console.log(key,value);
         }
-        //console.log("Map is: "+this.lastBlock.titleToId.get(String(artist.name+title)));
         console.log("Key is: "+String(artist.name+title));
         return this.lastBlock.titleToId.get(String(artist.name+title));
     }
@@ -101,9 +86,6 @@ module.exports = class NftBuyer extends Client {
         broker.setClient(this);
     }
   
-    /**
-     * Post a transaction transferring an NFT to a new owner.
-     */
      showNfts() {
         let nftList = this.lastBlock.getOwnersNftList(this.address);
         nftList.forEach(nftID => {
@@ -111,7 +93,7 @@ module.exports = class NftBuyer extends Client {
           console.log(`
           artist: ${nft.artistName} 
           piece: "${nft.title}"
-          ---x----x-----x-----x------
+          \n\n
           ${nft.content}
           `);
         });

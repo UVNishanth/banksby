@@ -12,16 +12,16 @@ module.exports = class NftBlock extends Block {
 
     // Tracking NFTs
     if(this.isGenesisBlock()){
-        this.nfts = new Map();
-        this.titleToId = new Map();
-        this.artistDb = new Map();
-        this.nftOwnerMap = new Map();
-        this.nftDb = new Map();
-        this.nftToArtistMap = new Map();
+        this.nfts = new Map();            // database of nfts in the system
+        this.titleToId = new Map();       // Map of title+artist to nftID
+        this.artistMap = new Map();       // Artist Map storing arrays of nftds created
+        this.nftOwnerMap = new Map();     // Owner Map storing arrays of nftds owned
+        this.nftDb = new Map();           // NFTID to owner mapping for quick check
+        this.nftToArtistMap = new Map();  // NFT to artist mapping
     }
     else{
         this.nfts = prevBlock.nfts;
-        this.artistDb = prevBlock.artistDb;
+        this.artistMap = prevBlock.artistMap;
         this.nftOwnerMap = prevBlock.nftOwnerMap;
         this.nftDb = prevBlock.nftDb;
         this.nftToArtistMap = prevBlock.nftToArtistMap;
@@ -44,77 +44,47 @@ module.exports = class NftBlock extends Block {
     if(!prev){
         return false;
     }
-    if(tx.data.type == undefined) return true;
-    //console.log("type of buyer:"+typeof(tx.data.buyer));
-    //console.log("tx is : "+tx.data.nftID);
-    switch (tx.data.type) {
+    if(tx.data.flag == undefined) return true;
+    switch (tx.data.flag) {
 
       case constants.CREATE_NFT: 
         this.createNft(tx.from, tx.id, tx.data.nft);
         break;
 
       case constants.UPDATE_MAPS:
-        // this.transferNft(tx.from, tx.data.owner, tx.data.nftID);
-        // break;
-        //console.log("HEERERERE");
-        //console.log(tx.data.nftOwnerMap);
-        let nftOwnerMap = new Map(Object.entries(JSON.parse(tx.data.nftOwnerMap)));
-        //console.log("HEERERERE");
-        // for( let[key, value] of nftOwnerMap.entries()){
-        //   console.log(key,value);
-        // }
+        let nftOwnerMap = new Map(Object.entries(JSON.parse(tx.data.nftOwnerMap))); 
         nftOwnerMap.forEach((value, key) => {
           nftOwnerMap.set(key, new Set(JSON.parse(value)));
         });
-
         let nftDb = new Map(Object.entries(JSON.parse(tx.data.nftDb)));
-        console.log("HEERERERE");
-        for( let[key, value] of nftOwnerMap.entries()){
-          console.log(key,value);
-        }
         nftDb.forEach((value, key) => {
           nftDb.set(key, JSON.parse(value));
         });
-        console.log("HEHEHEHE nftDb");
-        for( let[key, value] of nftDb.entries()){
-          console.log(key,value);
-        }
-        // let nftDb = new Map(Object.entries(tx.data.nftDb)); 
-        // let nftOwnerMap = new Map(Object.entries(tx.data.nftOwnerMap)); 
-        this.transferNft(nftDb, nftOwnerMap);
+        this.updateMap(nftDb, nftOwnerMap);
         break;
 
       default:
-        throw new Error(`Unrecognized type: ${tx.data.type}`);
+        throw new Error(`Unknown type: ${tx.data.type}`);
     }
 
     // Transaction added successfully.
     return true;
   }
 
-  /**
-   * When rerunning a block, we must also replaying any NFT
-   * related transactions.
-   * 
-   * @param {Block} prevBlock - The previous block in the blockchain, used for initial balances.
-   * 
-   * @returns {Boolean} - True if the block's transactions are all valid.
-   */
+  // to make sure block reruns with data of prevBlock
   rerun(prevBlock) {
     this.nftToArtistMap = prevBlock.nftToArtistMap;
     this.nfts = prevBlock.nfts;
     this.nftOwnerMap = prevBlock.nftOwnerMap;
-    this.artistDb = prevBlock.artistDb;
+    this.artistMap = prevBlock.artistMap;
     this.nftDb = prevBlock.nftDb;
     this.titleToId = prevBlock.titleToId;
     return super.rerun(prevBlock);
   }
 
-  // creates the fundraiser ID using the artist ID and the project ID
   
   createNft(artist, txID, nft) {
-    // The ID of an NFT is the hash of the owner address and
-    // the transaction ID.
+    
     let nftID = utils.hash(`${artist}  ${txID}`);
     this.nfts.set(nftID, nft);
     this.titleToId.set(String(nft.artistName+nft.title), nftID);
@@ -124,10 +94,10 @@ module.exports = class NftBlock extends Block {
     }
     
     // Adding NFT to artists list.
-    let artistNfts = this.artistDb.get(artist) || []; // using array coz insertion efficiency reqd
+    let artistNfts = this.artistMap.get(artist) || []; // using array coz insertion efficiency reqd
     if (!artistNfts.includes(nftID)) {
       artistNfts.push(nftID);
-      this.artistDb.set(artist, artistNfts);
+      this.artistMap.set(artist, artistNfts);
     }
     this.nftToArtistMap.set(nftID, artist);
 
@@ -139,48 +109,8 @@ module.exports = class NftBlock extends Block {
     }
     this.nftDb.set(nftID, artist);
   }
-
-  buyNft(buyer, nftID){
-  // Adding NFT to receiver's list.
-    // console.log("NFTS list: ");
-    // this.nfts.forEach((key, value) => {
-    //   console.log(key+": "+value);
-    // });
-    // let reqdNft = this.getNft(nftID);
-    // let price = reqdNft.price;
-    // let owner = this.nftDb.get(nftID);
-    // let artist = this.nftToArtistMap.get(nftID);
-    // console.log("Type of owner: "+typeof(owner)+" type of artist: "+typeof(artist));
-    // console.log("Values of owner: "+owner+" value of artist: "+artist);
-    // if(owner == artist){
-      //console.log("Type of buyer is: "+typeof(buyer));
-      //buyer.postTransaction([{ amount: price, address: artist.address }]);
-    //this.transferNft(buyer, artist, nftID)
-    //}
-    // else{
-    //   let share = 
-    // }
-  } 
-
-  // transferNft(buyer, seller, nftID) {
-  //   let buyerOwnedNfts = this.nftOwnerMap.get(buyer) || new Set(); // using set coz searching and deletion efficiency
-  //   if(!buyerOwnedNfts.has(nftID)) {
-  //       buyerOwnedNfts.add(nftID);
-  //       this.nftOwnerMap.set(buyer, buyerOwnedNfts);
-  //   }
-  //   this.nftDb.set(nftID, buyer);
-
-  //   // Removing nft from sender
-  //   let sellerOwnedNfts = this.nftOwnerMap.get(seller) || new Set();
-  //   sellerOwnedNfts.delete(nftID);
-  //   this.nftOwnerMap.set(seller, sellerOwnedNfts);
-  //   return;
-  // }
-  transferNft(nftDb, nftOwnerMap) {
-    // console.log("New owner map: ");
-    //     for(let [key, value] of nftOwnerMap){
-    //         console.log(key,value);
-    //     }
+ 
+  updateMap(nftDb, nftOwnerMap) {
     this.nftDb = new Map(nftDb);
     this.nftOwnerMap = new Map(nftOwnerMap);
     return;

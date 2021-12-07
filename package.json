@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/UVNishanth/imageBasedNFT#readme",
   "dependencies": {
-    "jimp": "^0.16.1"
+    "gifsicle": "^5.2.1",
+    "jimp": "^0.16.1",
+    "pngquant-bin": "^6.0.1"
   },
   "devDependencies": {
     "compress-images": "^2.0.4"

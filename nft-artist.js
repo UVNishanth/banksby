@@ -13,7 +13,7 @@ module.exports = class NftArtist extends Client {
     createNft(nft) {
       this.postGenericTransaction({
         data: {
-          type: constants.CREATE_NFT,
+          flag: constants.CREATE_NFT,
           nft: nft,
         }
       });
@@ -31,9 +31,6 @@ module.exports = class NftArtist extends Client {
       return this.lastBlock.nftOwnerMap.get(this.address);
     }
   
-    /**
-     * Post a transaction transferring an NFT to a new owner.
-     */
     showNfts() {
       let nftList = this.lastBlock.getOwnersNftList(this.address);
       nftList.forEach(nftID => {

@@ -30,29 +30,6 @@ let genesis = Blockchain.makeGenesis({
   ]),
 });
 
-// function reduceSize(image){
-//   // Base64 string
-//   const data = fs.readFileSync(image, "base64");
-//   // Convert base64 to buffer => <Buffer ff d8 ff db 00 43 00 ...
-//   //const buffer = Buffer.from(data, "base64");
-//   console.log("HAHAHA");
-//   Jimp.read('/Users/nishanthuchil/Documents/cs-168/imageBasedNFT/input/sample1.jpg').then((err, res) => {
-//     if (err) throw new Error(err);
-//     res.quality(50).write('./sample2.jpg');
-// });
-
-//}
-
-function encodeImage(file) {
-  // read binary data
-  var bitmap = fs.readFileSync(file);
-  console.log("Print bitmap: ");
-  console.log(bitmap);
-  // convert binary data to base64 encoded string
-  let xyz =  JSON.stringify(bitmap);
-  return xyz;
-}
-
 function showBalances(client) {
   console.log(`Studio Manglobe:  ${client.lastBlock.balanceOf(manglobe.address)}`);
   console.log(`Studio Madhouse:  ${client.lastBlock.balanceOf(madhouse.address)}`);
@@ -60,6 +37,7 @@ function showBalances(client) {
   console.log(`Mickey: ${client.lastBlock.balanceOf(mickey.address)}`);
   console.log(`Nujabes: ${client.lastBlock.balanceOf(nujabes.address)}`);
 }
+
 
 console.log("Initial balances:");
 showBalances(manglobe);
@@ -76,25 +54,20 @@ setTimeout(() => {
     artistName: nujabes.name,  title: "Battlecry",
     price: 20,
     royalty: 0.02,
-    content:
-    `
-    The elements compose a magnum
-    opus my modus operandi amalgam
-    `
+    content: //encodeImage('/Users/nishanthuchil/Documents/cs-168/imageBasedNFT/sample2.jpg')
+    `the elements compose a magnum
+    opus my modus operandi amalgam`
     });
 }, 2000);
 nujabes.showNfts();
+
+// Buyer approves broker to trade on behalf of him
 manglobe.approveBroker(shinichiro);
 
 
 setTimeout(() => {
   let nftID = manglobe.getNftIdsbyTitle(nujabes, "Battlecry");
-  //let image = nujabes.getNftImage(nftID);
-  //fs.writeFileSync("/Users/nishanthuchil/Documents/cs-168/imageBasedNFT/output/sample1.jpg", image);
-
-  console.log(`***Transferring NFT ${nftID}***`);
-  //nujabes.transferNft(manglobe.address, nftID);
-  //manglobe.buyNft(nftID, nujabes);
+  console.log(`${manglobe.name} buys ${nftID}`);
   shinichiro.buyNft(manglobe, nftID, nujabes);
 }, 5000);
 
@@ -118,32 +91,3 @@ setTimeout(() => {
 
   process.exit(0);
 }, 10000);
-
-// setTimeout(() => {
-//   let nftID = madhouse.getNftIdsbyTitle(nujabes, "Battlecry");
-//   console.log(`***Transferring NFT ${nftID}***`);
-//   //nujabes.transferNft(manglobe.address, nftID);
-//   madhouse.buyNft(nftID, manglobe, nujabes);
-// }, 5000);
-
-// // Print out the final balances after it has been running for some time.
-// setTimeout(() => {
-//   console.log();
-//   console.log(`Minnie has a chain of length ${minnie.currentBlock.chainLength}:`);
-//   console.log("Final balances (manglobe's perspective):");
-//   showBalances(manglobe);
-
-//   console.log();
-//   console.log("Showing NFTs for nujabes:");
-//   nujabes.showNfts();
-
-//   console.log();
-//   console.log("Showing NFTs for Studio Manglobe:");
-//   manglobe.showNfts();
-
-//   console.log();
-//   console.log("Showing NFTs for Studio Madhouse:");
-//   madhouse.showNfts();
-
-//   process.exit(0);
-// }, 10000);
