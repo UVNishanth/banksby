@@ -12,7 +12,6 @@ let fakeNet = new FakeNet();
 // Clients and miners
 let manglobe = new NftBuyer({name: "Studio Manglobe", net: fakeNet});
 let madhouse = new NftBuyer({name: "Studio Madhouse", net: fakeNet});
-let shinichiro = new NftBroker({name: "Shinichiro", net: fakeNet});
 let minnie = new Miner({name: "Minnie", net: fakeNet});
 let mickey = new Miner({name: "Mickey", net: fakeNet});
 
@@ -24,9 +23,19 @@ let genesis = Blockchain.makeGenesis({
   blockClass: NftBlock,
   transactionClass: Transaction,
   clientBalanceMap: new Map([
-    [manglobe,233], [madhouse, 500], [nujabes,500], [minnie,500], [mickey,500], [shinichiro, 200] 
+    [manglobe,233], [madhouse, 500], [nujabes,500], [minnie,500], [mickey,500]
   ]),
 });
+
+function encodeImage(file) {
+  // read binary data
+  let bitmap = fs.readFileSync(file);
+  console.log("Print bitmap: ");
+  console.log(bitmap);
+  // convert binary data to base64 encoded string
+  let xyz =  JSON.stringify(bitmap);
+  return xyz;
+}
 
 function showBalances(client) {
   console.log(`Studio Manglobe:  ${client.lastBlock.balanceOf(manglobe.address)}`);
@@ -35,6 +44,7 @@ function showBalances(client) {
   console.log(`Mickey: ${client.lastBlock.balanceOf(mickey.address)}`);
   console.log(`Nujabes: ${client.lastBlock.balanceOf(nujabes.address)}`);
 }
+
 
 console.log("Initial balances:");
 showBalances(manglobe);

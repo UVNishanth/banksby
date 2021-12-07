@@ -66,9 +66,7 @@ setTimeout(() => {
 }, 5000);
 
 setTimeout(() => {
-  console.log();
-  console.log(`Minnie has a chain of length ${minnie.currentBlock.chainLength}:`);
-  console.log("Final balances (manglobe's perspective):");
+  console.log("Final balances: ");
   showBalances(manglobe);
 
   console.log();

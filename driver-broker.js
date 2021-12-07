@@ -49,7 +49,7 @@ minnie.initialize(); mickey.initialize();
 
 // Artist creates her NFT.
 setTimeout(() => {
-  console.log("***CREATING NFT***");
+  console.log("CREATING NFT");
   nujabes.createNft({
     artistName: nujabes.name,  title: "Battlecry",
     price: 20,
@@ -72,9 +72,7 @@ setTimeout(() => {
 }, 5000);
 
 setTimeout(() => {
-  console.log();
-  console.log(`Minnie has a chain of length ${minnie.currentBlock.chainLength}:`);
-  console.log("Final balances (manglobe's perspective):");
+  console.log("Final balances:");
   showBalances(manglobe);
 
   console.log();
